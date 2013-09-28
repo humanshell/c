@@ -11,52 +11,58 @@ mkdir $NAME
 echo "# $NAME" > $NAME/README.md
 
 # create Makefile
-echo 'CC=gcc'                                >> $NAME/Makefile
-echo 'DEPS='                                 >> $NAME/Makefile
-echo 'LDLIBS='                               >> $NAME/Makefile
-echo 'CFLAGS = -g -Wall -O3 -std=c99'        >> $NAME/Makefile
-echo ''                                      >> $NAME/Makefile
-echo '%.o: %.c $(DEPS)'                      >> $NAME/Makefile
-echo -e "\t\tgcc -c -o $@ $< \$(CFLAGS)"     >> $NAME/Makefile
-echo ''                                      >> $NAME/Makefile
-echo "$NAME: main.o"                         >> $NAME/Makefile
-echo -e "\t\tgcc -o $@ $^ \$(CFLAGS)"        >> $NAME/Makefile
-echo ''                                      >> $NAME/Makefile
-echo 'test: test.o'                          >> $NAME/Makefile
-echo -e "\t\tgcc -o prog_test $^ \$(CFLAGS)" >> $NAME/Makefile
-echo -e "\t\t@./prog_test"                   >> $NAME/Makefile
-echo ''                                      >> $NAME/Makefile
-echo 'clean:'                                >> $NAME/Makefile
-echo -e "\t\trm -f *.o $NAME prog_test"      >> $NAME/Makefile
-echo ''                                      >> $NAME/Makefile
-echo '.PHONY: clean test'                    >> $NAME/Makefile
-echo ''                                      >> $NAME/Makefile
+cat > $NAME/Makefile <<EOF
+CC=gcc
+DEPS=
+LDLIBS=
+CFLAGS = -g -Wall -O3 -std=c99
+
+%.o: %.c \$(DEPS)
+		gcc -c -o $@ $< \$(CFLAGS)
+
+$NAME: main.o
+		gcc -o $@ $^ \$(CFLAGS)
+
+test: test.o
+		gcc -o prog_test $^ \$(CFLAGS)
+		@./prog_test
+
+clean:
+		rm -f *.o $NAME prog_test
+
+.PHONY: clean test
+EOF
+
 
 # create main file
-echo 'int main(int argc, const char *argv[]) {' >> $NAME/main.c
-echo '  return 0;'                              >> $NAME/main.c
-echo '}'                                        >> $NAME/main.c
+cat > $NAME/main.c <<EOF
+int main(int argc, const char *argv[]) {
+  return 0;
+}
+EOF
 
 # create test harness
-echo '#include <assert.h>'                      >> $NAME/test.c
-echo '#include <stdlib.h>'                      >> $NAME/test.c
-echo '#include <stdio.h>'                       >> $NAME/test.c
-echo ''                                         >> $NAME/test.c
-echo '// Helpers'                               >> $NAME/test.c
-echo ''                                         >> $NAME/test.c
-echo '#define test(fn) \'                       >> $NAME/test.c
-echo '  puts("... \x1b[33m" # fn "\x1b[0m"); \' >> $NAME/test.c
-echo '  test_##fn();'                           >> $NAME/test.c
-echo ''                                         >> $NAME/test.c
-echo '// Tests'                                 >> $NAME/test.c
-echo ''                                         >> $NAME/test.c
-echo 'static void test_*(void) {'               >> $NAME/test.c
-echo '}'                                        >> $NAME/test.c
-echo ''                                         >> $NAME/test.c
-echo '// Run Tests'                             >> $NAME/test.c
-echo 'int main(int argc, const char *argv[]) {' >> $NAME/test.c
-echo '  test(*);'                               >> $NAME/test.c
-echo '  puts("... \x1b[32m100%\x1b[0m\n");'     >> $NAME/test.c
-echo '  return 0;'                              >> $NAME/test.c
-echo '}'                                        >> $NAME/test.c
+cat > $NAME/test.c <<'EOF'
+#include <assert.h>
+#include <stdlib.h>
+#include <stdio.h>
+
+// Helpers
+
+#define test(fn) \
+  puts("... \x1b[33m" # fn "\x1b[0m"); \
+  test_##fn();
+
+// Tests
+
+static void test_*(void) {
+}
+
+// Run Tests
+int main(int argc, const char *argv[]) {
+  test(*);
+  puts("... \x1b[32m100%\x1b[0m\n");
+  return 0;
+}
+EOF
 
