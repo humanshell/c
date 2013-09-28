@@ -4,18 +4,40 @@
 NAME=$1
 NAME=${NAME:="newproject"}
 
-# create new project's directory
+# create directory
 mkdir $NAME
 
-# create new project's README file
+# create README file
 echo "# $NAME" > $NAME/README.md
 
-# create new project's main file
+# create Makefile
+echo 'CC=gcc'                                >> $NAME/Makefile
+echo 'DEPS='                                 >> $NAME/Makefile
+echo 'LDLIBS='                               >> $NAME/Makefile
+echo 'CFLAGS = -g -Wall -O3 -std=c99'        >> $NAME/Makefile
+echo ''                                      >> $NAME/Makefile
+echo '%.o: %.c $(DEPS)'                      >> $NAME/Makefile
+echo -e "\t\tgcc -c -o $@ $< \$(CFLAGS)"     >> $NAME/Makefile
+echo ''                                      >> $NAME/Makefile
+echo "$NAME: main.o"                         >> $NAME/Makefile
+echo -e "\t\tgcc -o $@ $^ \$(CFLAGS)"        >> $NAME/Makefile
+echo ''                                      >> $NAME/Makefile
+echo 'test: test.o'                          >> $NAME/Makefile
+echo -e "\t\tgcc -o prog_test $^ \$(CFLAGS)" >> $NAME/Makefile
+echo -e "\t\t@./prog_test"                   >> $NAME/Makefile
+echo ''                                      >> $NAME/Makefile
+echo 'clean:'                                >> $NAME/Makefile
+echo -e "\t\trm -f *.o $NAME prog_test"      >> $NAME/Makefile
+echo ''                                      >> $NAME/Makefile
+echo '.PHONY: clean test'                    >> $NAME/Makefile
+echo ''                                      >> $NAME/Makefile
+
+# create main file
 echo 'int main(int argc, const char *argv[]) {' >> $NAME/main.c
 echo '  return 0;'                              >> $NAME/main.c
 echo '}'                                        >> $NAME/main.c
 
-# create new project's test harness
+# create test harness
 echo '#include <assert.h>'                      >> $NAME/test.c
 echo '#include <stdlib.h>'                      >> $NAME/test.c
 echo '#include <stdio.h>'                       >> $NAME/test.c
